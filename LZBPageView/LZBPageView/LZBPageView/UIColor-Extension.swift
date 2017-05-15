@@ -12,7 +12,7 @@ extension UIColor {
     //类函数 class  func   func  函数
     class  func getRandomColor() ->UIColor
     {
-        return UIColor(red: CGFloat(arc4random_uniform(255)/255), green: CGFloat(arc4random_uniform(255)/255), blue: CGFloat(arc4random_uniform(255)/255), alpha: 1.0)
+        return UIColor(red: CGFloat(arc4random_uniform(255))/255.0, green: CGFloat(arc4random_uniform(255))/255.0, blue: CGFloat(arc4random_uniform(255))/255.0, alpha: 1.0)
     }
     //特性：1、在extension扩展，必须使用convenience便利构造函数
     // 2.必须调用self.init,构造默认没有返回值，但是系统会自动返回但是不能返回nil

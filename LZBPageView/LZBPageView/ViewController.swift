@@ -30,7 +30,7 @@ class ViewController: UIViewController {
         let pageStyleModel = LZBPageStyleModel()
         
         //4.创建pageView
-        let pageView = LZBPageView.init(frame: pageFrame, titles: titles, pageStyle: pageStyleModel, childVcs: childvcs, parentVc: self)
+        let pageView = LZBPageView(frame: pageFrame, titles: titles, pageStyle: pageStyleModel, childVcs: childvcs, parentVc: self)
         
         view.addSubview(pageView)
         
