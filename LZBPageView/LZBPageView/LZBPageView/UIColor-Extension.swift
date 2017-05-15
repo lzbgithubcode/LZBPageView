@@ -53,4 +53,12 @@ extension UIColor {
         self.init(r: CGFloat(r), g: CGFloat(g), b: CGFloat(b))
     }
     
+    //获取颜色的RGB值
+    func getRGBValue() -> (CGFloat , CGFloat , CGFloat){
+        guard let components = self.cgColor.components else {
+            fatalError("获取颜色的RGB值失败")
+        }
+        return (components[0] * 255,components[1] * 255,components[2] * 255)
+    }
+    
 }

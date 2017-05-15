@@ -18,9 +18,19 @@ class LZBTitleView: UIView {
     weak var delegate : LZBTitleViewDelegate?
     fileprivate var titles : [String]
     fileprivate var style : LZBPageStyleModel
+    
     fileprivate var currentIndex : NSInteger = 0
     fileprivate lazy  var titleLabels : [UILabel] = [UILabel]()
+    fileprivate lazy  var normalColor : (CGFloat, CGFloat, CGFloat) = self.style.titleViewTitleNormalColor.getRGBValue()
+    fileprivate lazy  var selectColor : (CGFloat, CGFloat, CGFloat) = self.style.titleViewTitleSelectColor.getRGBValue()
     
+    
+    fileprivate lazy  var deltaColor : (CGFloat, CGFloat, CGFloat) = {
+        let rdelta = self.selectColor.0 - self.normalColor.0
+        let gdelta = self.selectColor.1 - self.normalColor.1
+        let bdelta = self.selectColor.2 - self.normalColor.2
+        return (rdelta , gdelta , bdelta)
+    }()
     //懒加载
     fileprivate lazy var scrollView : UIScrollView = {
          let scrollView = UIScrollView(frame: self.bounds)
@@ -122,18 +132,47 @@ extension LZBTitleView {
       currentIndex = targetLabel.tag
     
       //3.调整到中心位置
-      var  offsetX = targetLabel.center.x - scrollView.bounds.width * 0.5
-      if offsetX < 0{
-          offsetX = 0
-      }
-     let  maxOffsetX = self.scrollView.contentSize.width - scrollView.bounds.width
-     if offsetX > maxOffsetX{
-       offsetX = maxOffsetX
-     }
-     scrollView.setContentOffset(CGPoint(x: offsetX, y: 0), animated: true)
+      self.adjustTargetOffset()
     
      //4.调用代理
      delegate?.titleView(self, targetIndex: currentIndex)
     }
    
+    func adjustTargetOffset(){
+        let  targetLabel = self.titleLabels[currentIndex]
+        var  offsetX = targetLabel.center.x - scrollView.bounds.width * 0.5
+        if offsetX < 0{
+            offsetX = 0
+        }
+        let  maxOffsetX = self.scrollView.contentSize.width - scrollView.bounds.width
+        if offsetX > maxOffsetX{
+            offsetX = maxOffsetX
+        }
+        scrollView.setContentOffset(CGPoint(x: offsetX, y: 0), animated: true)
+    }
+    
+}
+
+//MARK:- 遵守LZBContentViewDelegate协议
+extension LZBTitleView : LZBContentViewDelegate{
+    func contentView(contentView: LZBContentView, didScrollEnd index: Int) {
+        guard index <= self.titleLabels.count else {
+            return
+        }
+        currentIndex = index
+        self.adjustTargetOffset()
+    }
+    
+    func contentView(contentView: LZBContentView, soureIndex: Int, targetIndex: Int, progress: CGFloat) {
+        
+        //1.获取变化的label
+        let soureLabel = self.titleLabels[soureIndex]
+        let targetLabel = self.titleLabels[targetIndex]
+        
+        //2.颜色渐变
+        soureLabel.textColor = UIColor(r: (self.selectColor.0 - deltaColor.0) * progress, g: (self.selectColor.1 - deltaColor.1) * progress, b: (self.selectColor.2 - deltaColor.2) * progress)
+        targetLabel.textColor = UIColor(r: (self.normalColor.0 + deltaColor.0) * progress, g: (self.normalColor.1 + deltaColor.1) * progress, b: (self.normalColor.2 + deltaColor.2) * progress)
+    }
+
+
 }

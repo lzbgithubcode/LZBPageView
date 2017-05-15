@@ -8,14 +8,20 @@
 
 import UIKit
 
+protocol LZBContentViewDelegate : class  {
+    func contentView(contentView : LZBContentView , didScrollEnd index : Int)
+    func contentView(contentView : LZBContentView , soureIndex : Int, targetIndex : Int, progress : CGFloat)
+}
 
 private let kLZBContentViewCellID = "kLZBContentViewCellID"
 
 class LZBContentView: UIView{
 
+    weak var delegate : LZBContentViewDelegate?
     fileprivate var childVcs : [UIViewController]
     fileprivate var style : LZBPageStyleModel
     fileprivate var parentVc  : UIViewController
+    fileprivate var  startOffsetX : CGFloat = 0
     //懒加载collectionView
     fileprivate lazy var collectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -86,7 +92,68 @@ extension LZBContentView : UICollectionViewDataSource{
 
 //MARK:- 遵守代理协议UICollectionViewDelegate
 extension LZBContentView : UICollectionViewDelegate{
- 
+   
+    //滚动完成监听 - 减速完成
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+          self.contentViewScrollDidEnd()
+    }
+     //滚动完成监听 - 拖拽完成
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        if !decelerate{
+          self.contentViewScrollDidEnd()
+        }
+    }
+    
+    //滚动完成
+    fileprivate func contentViewScrollDidEnd(){
+        let currentIndex = Int(collectionView.contentOffset.x/collectionView.bounds.width)
+         delegate?.contentView(contentView: self, didScrollEnd: currentIndex)
+    }
+    
+    //记录起始位置的offsetX
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+          self.startOffsetX = collectionView.contentOffset.x
+    }
+    
+    //滚动进度
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+        //当前偏移量
+        let currentOffsetX = collectionView.contentOffset.x
+        
+        //如果相等就是没有动
+        guard currentOffsetX != startOffsetX else {
+            return
+        }
+        
+        var  soureIndex = 0
+        var  targetIndex = 0
+        var  progress : CGFloat = 0
+        let collectionViewWidth = collectionView.bounds.width
+        
+        //判断左右滑动
+        if currentOffsetX > startOffsetX{  //左滑
+            soureIndex = Int(currentOffsetX/collectionViewWidth)
+            targetIndex = soureIndex + 1
+            if targetIndex >= self.childVcs.count{
+               targetIndex = self.childVcs.count - 1
+            }
+            //进度
+            progress = (currentOffsetX - startOffsetX)/collectionViewWidth
+            
+            if (currentOffsetX - startOffsetX) == collectionViewWidth{
+               targetIndex = soureIndex
+            }
+        }
+        else  //右滑
+        {
+            targetIndex = Int(currentOffsetX/collectionViewWidth)
+            soureIndex = targetIndex + 1
+            progress = (startOffsetX - currentOffsetX)/collectionViewWidth
+            
+        }
+        delegate?.contentView(contentView: self, soureIndex: soureIndex, targetIndex: targetIndex, progress: progress)
+    }
 }
 
 //MARK:- 遵守titleView点击协议
