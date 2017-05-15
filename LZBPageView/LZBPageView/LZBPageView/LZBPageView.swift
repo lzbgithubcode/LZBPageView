@@ -48,5 +48,8 @@ extension LZBPageView {
     contentView.backgroundColor = UIColor.blue
     self.addSubview(contentView)
     
+    //3.设置代理对象
+      titleView.delegate = contentView
+    
     }
 }

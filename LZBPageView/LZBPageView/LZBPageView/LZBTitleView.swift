@@ -8,9 +8,18 @@
 
 import UIKit
 
+//用class表示只有类可以继承协议，本来不需要声明什么的
+protocol LZBTitleViewDelegate : class {
+    func titleView(_ titleView : LZBTitleView, targetIndex : NSInteger)
+}
+
+
 class LZBTitleView: UIView {
-    var titles : [String]
-    var style : LZBPageStyleModel
+    weak var delegate : LZBTitleViewDelegate?
+    fileprivate var titles : [String]
+    fileprivate var style : LZBPageStyleModel
+    fileprivate var currentIndex : NSInteger = 0
+    fileprivate lazy  var titleLabels : [UILabel] = [UILabel]()
     
     //懒加载
     fileprivate lazy var scrollView : UIScrollView = {
@@ -43,15 +52,16 @@ extension LZBTitleView {
     
     private func setupTitles(){
         //1.初始化标题
-        var titleLabels : [UILabel] = [UILabel]()
         let  count = self.titles.count
         for i in 0..<count {
            let tilteLabel = UILabel()
            let title = self.titles[i]
+            tilteLabel.tag = i
             tilteLabel.text = title
             tilteLabel.textAlignment = .center
             tilteLabel.textColor = i == 0 ? style.titleViewTitleSelectColor :style.titleViewTitleNormalColor
             tilteLabel.font = style.titleViewTitleFont
+            tilteLabel.isUserInteractionEnabled = true
             scrollView.addSubview(tilteLabel)
             titleLabels.append(tilteLabel)
             
@@ -93,11 +103,37 @@ extension LZBTitleView {
 //MARK:-监听标题点击
 extension LZBTitleView {
   
-    func titleLabelClick(_ tapGester : UITapGestureRecognizer){
-        guard let  tapView = tapGester.view as? UILabel else{
+  @objc fileprivate  func titleLabelClick(_ tapGester : UITapGestureRecognizer){
+    
+      //1.检验lable 是否为nil
+        guard let targetLabel = tapGester.view as? UILabel else{
           return
         }
-       tapView.sizeToFit()
+    
+        guard targetLabel.tag != currentIndex else {
+             return
+        }
+    
+    
+      //2.选中三部曲
+      let lastLabel = self.titleLabels[currentIndex]
+      lastLabel.textColor = style.titleViewTitleNormalColor
+      targetLabel.textColor = style.titleViewTitleSelectColor
+      currentIndex = targetLabel.tag
+    
+      //3.调整到中心位置
+      var  offsetX = targetLabel.center.x - scrollView.bounds.width * 0.5
+      if offsetX < 0{
+          offsetX = 0
+      }
+     let  maxOffsetX = self.scrollView.contentSize.width - scrollView.bounds.width
+     if offsetX > maxOffsetX{
+       offsetX = maxOffsetX
+     }
+     scrollView.setContentOffset(CGPoint(x: offsetX, y: 0), animated: true)
+    
+     //4.调用代理
+     delegate?.titleView(self, targetIndex: currentIndex)
     }
    
 }

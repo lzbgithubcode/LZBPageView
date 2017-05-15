@@ -88,3 +88,15 @@ extension LZBContentView : UICollectionViewDataSource{
 extension LZBContentView : UICollectionViewDelegate{
  
 }
+
+//MARK:- 遵守titleView点击协议
+extension LZBContentView : LZBTitleViewDelegate{
+    func  titleView(_ titleView: LZBTitleView, targetIndex: NSInteger) {
+        
+        //1.选中标题对应的indexPath
+        let indexPath = IndexPath(item: targetIndex, section: 0)
+        
+        //2.滚动到对应的cell
+        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
+    }
+}
