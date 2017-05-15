@@ -30,6 +30,7 @@ class LZBContentView: UIView{
            collectionView.isPagingEnabled = true
            collectionView.showsHorizontalScrollIndicator = false
            collectionView.bounces = false
+           collectionView.scrollsToTop = false
         return collectionView
     }()
     

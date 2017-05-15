@@ -13,9 +13,10 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let pageFrame = CGRect(x : 0, y : 64, width : view.bounds.size.width, height : view.bounds.size.height)
+        self.automaticallyAdjustsScrollViewInsets = false
+        let pageFrame = CGRect(x : 0, y : 64, width : view.bounds.size.width, height : view.bounds.size.height-64)
         //1.创建标题
-        let titles = ["英雄联盟","火蓝","火蓝","火蓝"]
+        let titles = ["英雄联盟","火蓝","提姆队长","史前巨鳄","洛克萨斯之手","狗头","武器"]
         //2.创建控制器数组
         var childvcs = [UIViewController]()
         for _ in 0..<titles.count
@@ -27,7 +28,8 @@ class ViewController: UIViewController {
         }
         
         //3.创建样式
-        let pageStyleModel = LZBPageStyleModel()
+        var  pageStyleModel = LZBPageStyleModel()
+        pageStyleModel.titleViewIsScrollEnable = true
         
         //4.创建pageView
         let pageView = LZBPageView(frame: pageFrame, titles: titles, pageStyle: pageStyleModel, childVcs: childvcs, parentVc: self)
