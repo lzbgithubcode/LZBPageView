@@ -21,7 +21,7 @@ class ViewController: UIViewController {
         for _ in 0..<titles.count
         {
            let vc  = UIViewController()
-           let  backgroundcolor = UIColor.init(red: CGFloat(arc4random_uniform(255)/255), green: CGFloat(arc4random_uniform(255)/255), blue: CGFloat(arc4random_uniform(255)/255), alpha: 1.0)
+           let  backgroundcolor = UIColor.getRandomColor()
             vc.view.backgroundColor = backgroundcolor
             childvcs.append(vc)
         }
@@ -36,11 +36,7 @@ class ViewController: UIViewController {
         
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
+   
 
 }
 

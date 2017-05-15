@@ -16,6 +16,7 @@
 		C884D67E1EC984DB00A09945 /* LZBTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C884D67D1EC984DB00A09945 /* LZBTitleView.swift */; };
 		C884D6801EC984FF00A09945 /* LZBContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C884D67F1EC984FF00A09945 /* LZBContentView.swift */; };
 		C884D6821EC985C500A09945 /* LZBPageStyleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C884D6811EC985C500A09945 /* LZBPageStyleModel.swift */; };
+		C884D6861EC9996200A09945 /* UIColor-Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C884D6851EC9996200A09945 /* UIColor-Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		C884D67D1EC984DB00A09945 /* LZBTitleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LZBTitleView.swift; sourceTree = "<group>"; };
 		C884D67F1EC984FF00A09945 /* LZBContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LZBContentView.swift; sourceTree = "<group>"; };
 		C884D6811EC985C500A09945 /* LZBPageStyleModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LZBPageStyleModel.swift; sourceTree = "<group>"; };
+		C884D6851EC9996200A09945 /* UIColor-Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor-Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +82,7 @@
 				C884D67D1EC984DB00A09945 /* LZBTitleView.swift */,
 				C884D67F1EC984FF00A09945 /* LZBContentView.swift */,
 				C884D6811EC985C500A09945 /* LZBPageStyleModel.swift */,
+				C884D6851EC9996200A09945 /* UIColor-Extension.swift */,
 			);
 			path = LZBPageView;
 			sourceTree = "<group>";
@@ -162,6 +165,7 @@
 				C884D6691EC9841300A09945 /* AppDelegate.swift in Sources */,
 				C884D67E1EC984DB00A09945 /* LZBTitleView.swift in Sources */,
 				C884D67C1EC984C100A09945 /* LZBPageView.swift in Sources */,
+				C884D6861EC9996200A09945 /* UIColor-Extension.swift in Sources */,
 				C884D6821EC985C500A09945 /* LZBPageStyleModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
