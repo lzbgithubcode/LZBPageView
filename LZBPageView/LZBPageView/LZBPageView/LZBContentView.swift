@@ -22,6 +22,7 @@ class LZBContentView: UIView{
     fileprivate var style : LZBPageStyleModel
     fileprivate var parentVc  : UIViewController
     fileprivate var  startOffsetX : CGFloat = 0
+    fileprivate var isForbidDelegate : Bool = false
     //懒加载collectionView
     fileprivate lazy var collectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -113,13 +114,19 @@ extension LZBContentView : UICollectionViewDelegate{
     //记录起始位置的offsetX
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
           self.startOffsetX = collectionView.contentOffset.x
+         isForbidDelegate = false
     }
     
     //滚动进度
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         
+        
         //当前偏移量
         let currentOffsetX = collectionView.contentOffset.x
+        
+        guard !isForbidDelegate else {
+            return
+        }
         
         //如果相等就是没有动
         guard currentOffsetX != startOffsetX else {
@@ -159,6 +166,9 @@ extension LZBContentView : UICollectionViewDelegate{
 //MARK:- 遵守titleView点击协议
 extension LZBContentView : LZBTitleViewDelegate{
     func  titleView(_ titleView: LZBTitleView, targetIndex: NSInteger) {
+        
+        //点击禁止代理
+        self.isForbidDelegate = true
         
         //1.选中标题对应的indexPath
         let indexPath = IndexPath(item: targetIndex, section: 0)

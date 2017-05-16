@@ -138,6 +138,7 @@ extension LZBTitleView {
      delegate?.titleView(self, targetIndex: currentIndex)
     }
    
+    //调整位置
     func adjustTargetOffset(){
         let  targetLabel = self.titleLabels[currentIndex]
         var  offsetX = targetLabel.center.x - scrollView.bounds.width * 0.5
