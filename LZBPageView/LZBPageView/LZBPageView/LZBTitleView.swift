@@ -24,19 +24,26 @@ class LZBTitleView: UIView {
     fileprivate lazy  var normalColor : (CGFloat, CGFloat, CGFloat) = self.style.titleViewTitleNormalColor.getRGBValue()
     fileprivate lazy  var selectColor : (CGFloat, CGFloat, CGFloat) = self.style.titleViewTitleSelectColor.getRGBValue()
     
-    
+    //懒加载
     fileprivate lazy  var deltaColor : (CGFloat, CGFloat, CGFloat) = {
         let rdelta = self.selectColor.0 - self.normalColor.0
         let gdelta = self.selectColor.1 - self.normalColor.1
         let bdelta = self.selectColor.2 - self.normalColor.2
         return (rdelta , gdelta , bdelta)
     }()
-    //懒加载
+    
+    
     fileprivate lazy var scrollView : UIScrollView = {
          let scrollView = UIScrollView(frame: self.bounds)
            scrollView.showsHorizontalScrollIndicator = false
            scrollView.scrollsToTop = false
           return scrollView
+    }()
+    
+    fileprivate lazy var bottomLine : UIView = {
+        let bottomLine = UIView()
+        bottomLine.backgroundColor = self.style.bottomLineColor
+        return bottomLine
     }()
     
     init(frame : CGRect, titles : [String], style : LZBPageStyleModel) {
@@ -58,7 +65,23 @@ extension LZBTitleView {
    fileprivate func setupUI(){
      addSubview(scrollView)
      setupTitles()
+    
+    if self.style.isShowBottomLine{
+      self.setupBottomLine()
+    }
+    
    }
+    
+    
+    private func setupBottomLine(){
+       scrollView.addSubview(self.bottomLine)
+        guard let titleLabel = self.titleLabels.first else {
+             return
+        }
+       bottomLine.frame = titleLabel.frame
+       bottomLine.frame.size.height = self.style.bottomLineHeight
+       bottomLine.frame.origin.y = bounds.height - self.style.bottomLineHeight
+    }
     
     private func setupTitles(){
         //1.初始化标题
@@ -88,7 +111,7 @@ extension LZBTitleView {
         let   titleLabH : CGFloat = style.titleViewHeight
         
         for (i, titleLabel) in titleLabels.enumerated() {
-            if style.titleViewIsScrollEnable   //可以滚动
+            if style.isScrollEnable   //可以滚动
             {
                 titleLabW = (titleLabel.text! as NSString).size(attributes: [NSFontAttributeName : titleLabel.font]).width
                 //计算位置
@@ -102,8 +125,17 @@ extension LZBTitleView {
         }
         
         //3.设置contensize
-        if style.titleViewIsScrollEnable{
+        if style.isScrollEnable{
         self.scrollView.contentSize = CGSize(width: titleLabels.last!.frame.maxX + style.titleViewMargin, height: 0)
+         
+         //4、设置初始位置方法
+            if self.style.isNeedScale{
+                guard let titleLabel = titleLabels.first else {
+                    return
+                }
+                titleLabel.transform = CGAffineTransform(scaleX: self.style.maxScale, y: self.style.maxScale)
+            }
+            
         }
     }
   
@@ -119,11 +151,9 @@ extension LZBTitleView {
         guard let targetLabel = tapGester.view as? UILabel else{
           return
         }
-    
         guard targetLabel.tag != currentIndex else {
              return
         }
-    
     
       //2.选中三部曲
       let lastLabel = self.titleLabels[currentIndex]
@@ -134,8 +164,25 @@ extension LZBTitleView {
       //3.调整到中心位置
       self.adjustTargetOffset()
     
-     //4.调用代理
+      //4.调用代理
      delegate?.titleView(self, targetIndex: currentIndex)
+    
+     //5.点击滚动下滑线
+     if self.style.isShowBottomLine {
+        UIView.animate(withDuration: 0.25, animations: { 
+              self.bottomLine.frame.size.width = targetLabel.frame.width
+              self.bottomLine.frame.origin.x = targetLabel.frame.origin.x
+        })
+     }
+    
+    //6.点击放大字体
+     if self.style.isNeedScale {
+        UIView.animate(withDuration: 0.25, animations: {
+            lastLabel.transform = CGAffineTransform.identity
+            targetLabel.transform = CGAffineTransform(scaleX: self.style.maxScale, y: self.style.maxScale)
+        })
+     }
+    
     }
    
     //调整位置
@@ -173,6 +220,23 @@ extension LZBTitleView : LZBContentViewDelegate{
         //2.颜色渐变
         soureLabel.textColor = UIColor(r: (self.selectColor.0 - deltaColor.0) * progress, g: (self.selectColor.1 - deltaColor.1) * progress, b: (self.selectColor.2 - deltaColor.2) * progress)
         targetLabel.textColor = UIColor(r: (self.normalColor.0 + deltaColor.0) * progress, g: (self.normalColor.1 + deltaColor.1) * progress, b: (self.normalColor.2 + deltaColor.2) * progress)
+        
+        //3.拖动contentView,下划线渐变
+        if self.style.isShowBottomLine {
+            
+            let deltaWidth = targetLabel.frame.width - soureLabel.frame.width
+            let deltaX = targetLabel.frame.origin.x - soureLabel.frame.origin.x
+            bottomLine.frame.size.width = soureLabel.frame.width + deltaWidth * progress
+            bottomLine.frame.origin.x = soureLabel.frame.origin.x + deltaX * progress
+           
+        }
+        
+        //4.拖动contentView，改变字体大小
+        if self.style.isNeedScale {
+           let deltaScale = self.style.maxScale - 1.0
+            soureLabel.transform = CGAffineTransform(scaleX: self.style.maxScale - deltaScale * progress, y: self.style.maxScale - deltaScale * progress)
+            targetLabel.transform =  CGAffineTransform(scaleX: 1.0 + deltaScale * progress, y: 1.0 + deltaScale * progress)
+        }
     }
 
 

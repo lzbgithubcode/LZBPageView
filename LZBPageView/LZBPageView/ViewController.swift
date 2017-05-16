@@ -29,7 +29,8 @@ class ViewController: UIViewController {
         
         //3.创建样式
         var  pageStyleModel = LZBPageStyleModel()
-        pageStyleModel.titleViewIsScrollEnable = true
+        pageStyleModel.isScrollEnable = true
+        pageStyleModel.isNeedScale = true 
         
         //4.创建pageView
         let pageView = LZBPageView(frame: pageFrame, titles: titles, pageStyle: pageStyleModel, childVcs: childvcs, parentVc: self)
