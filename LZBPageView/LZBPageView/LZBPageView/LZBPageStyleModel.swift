@@ -24,4 +24,10 @@ struct LZBPageStyleModel {
     var isNeedScale : Bool = false   //是否需要放大
     var maxScale : CGFloat = 1.2   //缩放的最大值
     
+    var isNeedMask : Bool = false   //是否需要遮罩
+    var maskColor  : UIColor = UIColor(white: 0.4, alpha: 0.5)  //遮罩颜色
+    var maskInsetMargin : CGFloat = 10.0  //遮罩内部间距
+    var maskHeight : CGFloat = 25.0  //遮罩高度
+    var maskLayerRadius : CGFloat = 12.5  //遮罩圆角
+    
 }

@@ -20,6 +20,7 @@ class LZBTitleView: UIView {
     fileprivate var style : LZBPageStyleModel
     
     fileprivate var currentIndex : NSInteger = 0
+    
     fileprivate lazy  var titleLabels : [UILabel] = [UILabel]()
     fileprivate lazy  var normalColor : (CGFloat, CGFloat, CGFloat) = self.style.titleViewTitleNormalColor.getRGBValue()
     fileprivate lazy  var selectColor : (CGFloat, CGFloat, CGFloat) = self.style.titleViewTitleSelectColor.getRGBValue()
@@ -31,21 +32,24 @@ class LZBTitleView: UIView {
         let bdelta = self.selectColor.2 - self.normalColor.2
         return (rdelta , gdelta , bdelta)
     }()
-    
-    
     fileprivate lazy var scrollView : UIScrollView = {
          let scrollView = UIScrollView(frame: self.bounds)
            scrollView.showsHorizontalScrollIndicator = false
            scrollView.scrollsToTop = false
           return scrollView
     }()
-    
     fileprivate lazy var bottomLine : UIView = {
         let bottomLine = UIView()
         bottomLine.backgroundColor = self.style.bottomLineColor
         return bottomLine
     }()
+    fileprivate lazy var lableMaskView : UIView  = {
+        let lableMaskView = UIView()
+        lableMaskView.backgroundColor = self.style.maskColor
+        return lableMaskView
+    }()
     
+    //Mark:- 构造函数
     init(frame : CGRect, titles : [String], style : LZBPageStyleModel) {
         self.titles = titles
         self.style = style
@@ -65,9 +69,12 @@ extension LZBTitleView {
    fileprivate func setupUI(){
      addSubview(scrollView)
      setupTitles()
-    
     if self.style.isShowBottomLine{
       self.setupBottomLine()
+    }
+    
+    if self.style.isNeedMask{
+      self.setupMaskView()
     }
     
    }
@@ -81,6 +88,27 @@ extension LZBTitleView {
        bottomLine.frame = titleLabel.frame
        bottomLine.frame.size.height = self.style.bottomLineHeight
        bottomLine.frame.origin.y = bounds.height - self.style.bottomLineHeight
+    }
+    
+    private func setupMaskView(){
+        scrollView.addSubview(self.lableMaskView)
+        guard let titleLabel = self.titleLabels.first else {
+            return
+        }
+        
+        let maskH : CGFloat = style.maskHeight
+        let maskY : CGFloat = (titleLabel.frame.height - maskH) * 0.5
+        var maskX : CGFloat = titleLabel.frame.origin.x
+        var maskW : CGFloat = titleLabel.frame.width
+        
+        if self.style.isScrollEnable {
+           maskX = maskX - self.style.maskInsetMargin
+           maskW = maskW + self.style.maskInsetMargin * 2
+        }
+        
+        lableMaskView.layer.frame = CGRect(x: maskX, y: maskY, width: maskW, height: maskH)
+        lableMaskView.layer.cornerRadius = style.maskLayerRadius
+        lableMaskView.layer.masksToBounds = true 
     }
     
     private func setupTitles(){
@@ -126,8 +154,12 @@ extension LZBTitleView {
         
         //3.设置contensize
         if style.isScrollEnable{
-        self.scrollView.contentSize = CGSize(width: titleLabels.last!.frame.maxX + style.titleViewMargin, height: 0)
-         
+            self.scrollView.contentSize = CGSize(width: titleLabels.last!.frame.maxX + style.titleViewMargin, height: 0)
+        }
+        else{
+            self.scrollView.contentSize = CGSize(width: scrollView.bounds.width, height: 0)
+        }
+        
          //4、设置初始位置方法
             if self.style.isNeedScale{
                 guard let titleLabel = titleLabels.first else {
@@ -135,8 +167,6 @@ extension LZBTitleView {
                 }
                 titleLabel.transform = CGAffineTransform(scaleX: self.style.maxScale, y: self.style.maxScale)
             }
-            
-        }
     }
   
 }
@@ -162,7 +192,7 @@ extension LZBTitleView {
       currentIndex = targetLabel.tag
     
       //3.调整到中心位置
-      self.adjustTargetOffset()
+       self.adjustTargetOffset()
     
       //4.调用代理
      delegate?.titleView(self, targetIndex: currentIndex)
@@ -182,6 +212,14 @@ extension LZBTitleView {
             targetLabel.transform = CGAffineTransform(scaleX: self.style.maxScale, y: self.style.maxScale)
         })
      }
+    
+    //7.点击mask滚动
+    if self.style.isNeedMask {
+        UIView.animate(withDuration: 0.25, animations: { 
+            self.lableMaskView.frame.size.width = self.style.isScrollEnable ? targetLabel.frame.width + 2 * self.style.maskInsetMargin :  targetLabel.frame.width
+            self.lableMaskView.frame.origin.x = self.style.isScrollEnable ? targetLabel.frame.origin.x - self.style.maskInsetMargin :  targetLabel.frame.origin.x
+        })
+    }
     
     }
    
@@ -207,8 +245,8 @@ extension LZBTitleView : LZBContentViewDelegate{
         guard index <= self.titleLabels.count else {
             return
         }
-        currentIndex = index
-        self.adjustTargetOffset()
+         currentIndex = index
+         self.adjustTargetOffset()
     }
     
     func contentView(contentView: LZBContentView, soureIndex: Int, targetIndex: Int, progress: CGFloat) {
@@ -221,22 +259,28 @@ extension LZBTitleView : LZBContentViewDelegate{
         soureLabel.textColor = UIColor(r: (self.selectColor.0 - deltaColor.0) * progress, g: (self.selectColor.1 - deltaColor.1) * progress, b: (self.selectColor.2 - deltaColor.2) * progress)
         targetLabel.textColor = UIColor(r: (self.normalColor.0 + deltaColor.0) * progress, g: (self.normalColor.1 + deltaColor.1) * progress, b: (self.normalColor.2 + deltaColor.2) * progress)
         
-        //3.拖动contentView,下划线渐变
-        if self.style.isShowBottomLine {
-            
-            let deltaWidth = targetLabel.frame.width - soureLabel.frame.width
-            let deltaX = targetLabel.frame.origin.x - soureLabel.frame.origin.x
-            bottomLine.frame.size.width = soureLabel.frame.width + deltaWidth * progress
-            bottomLine.frame.origin.x = soureLabel.frame.origin.x + deltaX * progress
-           
-        }
-        
         //4.拖动contentView，改变字体大小
         if self.style.isNeedScale {
-           let deltaScale = self.style.maxScale - 1.0
+            let deltaScale = self.style.maxScale - 1.0
             soureLabel.transform = CGAffineTransform(scaleX: self.style.maxScale - deltaScale * progress, y: self.style.maxScale - deltaScale * progress)
             targetLabel.transform =  CGAffineTransform(scaleX: 1.0 + deltaScale * progress, y: 1.0 + deltaScale * progress)
         }
+        
+        let deltaWidth = targetLabel.frame.width - soureLabel.frame.width
+        let deltaX = targetLabel.frame.origin.x - soureLabel.frame.origin.x
+        //3.拖动contentView,下划线渐变
+        if self.style.isShowBottomLine {
+            bottomLine.frame.size.width = soureLabel.frame.width + deltaWidth * progress
+            bottomLine.frame.origin.x = soureLabel.frame.origin.x + deltaX * progress
+        }
+        
+        //4.拖动contenView，mask渐变
+        if self.style.isNeedMask {
+            self.lableMaskView.frame.size.width = self.style.isScrollEnable ? soureLabel.frame.width + 2 * self.style.maskInsetMargin + deltaWidth * progress : soureLabel.frame.width + deltaWidth * progress
+            self.lableMaskView.frame.origin.x = self.style.isScrollEnable ? soureLabel.frame.origin.x -  self.style.maskInsetMargin + deltaX * progress : soureLabel.frame.origin.x + deltaX * progress
+
+        }
+       
     }
 
 
