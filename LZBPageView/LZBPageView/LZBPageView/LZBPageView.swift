@@ -15,10 +15,6 @@ class LZBPageView: UIView {
     var childVcs  : [UIViewController]
     var parentVc  : UIViewController
     
-    
-    
-    
-    
     init(frame: CGRect, titles : [String], pageStyle : LZBPageStyleModel, childVcs : [UIViewController] , parentVc: UIViewController) {
         self.titles = titles
         self.pageStyle = pageStyle
